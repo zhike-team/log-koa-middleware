@@ -8,7 +8,7 @@ function logger (opts) {
   let defaultOptions = {
     requestHeadersAttributes: 'all',
     pathConfig: {
-      escape: null,
+      logOnly: true,
       requestBody: true,
       responseBody: true,
       requestHeaders: true
@@ -33,13 +33,13 @@ function logger (opts) {
   }
 
   return async function (ctx, next) {
-    let escapeFlag = confirmLog(defaultOptions.pathConfig.escape, ctx.path)
+    let mainSwitch = confirmLog(defaultOptions.pathConfig.logOnly, ctx.path)
 
     const startTime = new Date()
     global.console.log = console.log.bind(global, `reqId: ${reqId} `)
 
     // 打印headers
-    let headersLogFlag = escapeFlag ? false : confirmLog(defaultOptions.pathConfig.requestHeaders, ctx.path)
+    let headersLogFlag = mainSwitch ? confirmLog(defaultOptions.pathConfig.requestHeaders, ctx.path) : false
     if (headersLogFlag) {
       if (defaultOptions.requestHeadersAttributes === 'all') {
         console.log('[requestHeaders]:', ctx.headers)
@@ -54,7 +54,7 @@ function logger (opts) {
     }
 
     // 打印requestBody的配置
-    if (!escapeFlag && ctx.request.body) {
+    if (mainSwitch && ctx.request.body) {
       let logFlag = confirmLog(defaultOptions.pathConfig.requestBody, ctx.path)
       if (logFlag) {
         console.log('[requestBody]:', ctx.request.body.dataValues)
@@ -64,10 +64,12 @@ function logger (opts) {
     await next()
 
     // 打印responseBody配置
-    if (!escapeFlag && ctx.body) {
-      let logFlag = confirmLog(defaultOptions.pathConfig.responseBody, ctx.path)
-      if (logFlag) {
-        console.log('[responseBody]:', ctx.data.dataValues || ctx.data)
+    if (ctx.body) {
+      if (mainSwitch) {
+        let logFlag = confirmLog(defaultOptions.pathConfig.responseBody, ctx.path)
+        if (logFlag) {
+          console.log('[responseBody]:', ctx.data.dataValues || ctx.data)
+        }
       }
 
       // 没有自定义reqId则手动补充
