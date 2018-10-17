@@ -5,59 +5,57 @@ module.exports = logger
 
 function logger (opts) {
   let reqId
-  let escapePath = null
-  let displayOptions = {
-    requestBody: true,
-    responseBody: true,
-    requestHeaders: true,
-    requestHeadersAttributes: 'all'
+  let defaultOptions = {
+    requestHeadersAttributes: 'all',
+    pathConfig: {
+      escape: null,
+      requestBody: true,
+      responseBody: true,
+      requestHeaders: true
+    }
   }
 
+  // 初始化配置
   if (typeof opts === 'object') {
-    reqId = opts.reqId ? opts.reqId : uuidv1()
-
-    // 不打印日志的path
-    if (opts.escapePath && Array.isArray(opts.escapePath)) {
-      escapePath = new Set(opts.escapePath)
+    if (opts.pathConfig) {
+      defaultOptions.pathConfig = Object.assign(defaultOptions.pathConfig, opts.pathConfig)
     }
-
-    // 不打印的参数
-    const dpo = opts.displayOptions
-    if (dpo && typeof dpo === 'object') {
-      displayOptions = Object.assign(displayOptions, dpo)
+    if (opts.requestHeadersAttributes) {
+      defaultOptions.requestHeadersAttributes = opts.requestHeadersAttributes
     }
+  }
+
+  // 初始化响应id
+  if (typeof opts === 'object' && opts.reqId) {
+    reqId = opts.reqId
   } else {
-    throw new Error('options is not a object')
+    reqId = uuidv1()
   }
 
   return async function (ctx, next) {
-    if (escapePath && escapePath.has(ctx.path)) {
-      await next()
-      return
-    }
+    let escapeFlag = confirmLog(defaultOptions.pathConfig.escape, ctx.path)
 
     const startTime = new Date()
     global.console.log = console.log.bind(global, `reqId: ${reqId} `)
 
     // 打印headers
-    let headersLogFlag = confirmLog(displayOptions.requestHeaders, ctx.path)
+    let headersLogFlag = escapeFlag ? false : confirmLog(defaultOptions.pathConfig.requestHeaders, ctx.path)
     if (headersLogFlag) {
-      if (displayOptions.requestHeadersAttributes === 'all') {
+      if (defaultOptions.requestHeadersAttributes === 'all') {
         console.log('[requestHeaders]:', ctx.headers)
-      } else if (Array.isArray(displayOptions.requestHeadersAttributes) && displayOptions.requestHeadersAttributes.length) {
+      } else if (Array.isArray(defaultOptions.requestHeadersAttributes) && defaultOptions.requestHeadersAttributes.length) {
         const headers = ctx.headers
         const logHeaders = {}
-        displayOptions.requestHeadersAttributes.forEach(key => {
+        defaultOptions.requestHeadersAttributes.forEach(key => {
           logHeaders[key] = headers[key.toLowerCase()]
-          // console.log(`${key}: ${headers[key.toLowerCase()]}`)
         })
         console.log('[requestHeaders]:', logHeaders)
       }
     }
 
     // 打印requestBody的配置
-    if (ctx.request.body) {
-      let logFlag = confirmLog(displayOptions.requestBody, ctx.path)
+    if (!escapeFlag && ctx.request.body) {
+      let logFlag = confirmLog(defaultOptions.pathConfig.requestBody, ctx.path)
       if (logFlag) {
         console.log('[requestBody]:', ctx.request.body.dataValues)
       }
@@ -66,14 +64,14 @@ function logger (opts) {
     await next()
 
     // 打印responseBody配置
-    if (ctx.body) {
-      let logFlag = confirmLog(displayOptions.responseBody, ctx.path)
+    if (!escapeFlag && ctx.body) {
+      let logFlag = confirmLog(defaultOptions.pathConfig.responseBody, ctx.path)
       if (logFlag) {
         console.log('[responseBody]:', ctx.data.dataValues || ctx.data)
       }
 
       // 没有自定义reqId则手动补充
-      if (!opts.reqId) {
+      if (!opts || !opts.reqId) {
         ctx.body = Object.assign({reqId}, ctx.body)
       }
     } else {
@@ -87,6 +85,10 @@ function logger (opts) {
 
   // 检测path是否符合详细config配置
   function confirmLog (config, path) {
+    if (config === null) {
+      return false
+    }
+
     let logFlag = false
 
     if (config === true) {
