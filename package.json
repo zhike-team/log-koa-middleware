@@ -1,0 +1,35 @@
+{
+  "name": "log-koa-middleware",
+  "version": "1.0.0",
+  "description": "日志打印中间件",
+  "main": "index.js",
+  "dependencies": {
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "koa": "^2.5.3",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "mocha": "^5.2.0",
+    "power-assert": "^1.6.1",
+    "sinon": "^7.0.0",
+    "supertest": "^3.3.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zhike-team/log-koa-middleware.git"
+  },
+  "keywords": [
+    "koa",
+    "log"
+  ],
+  "author": "renxing",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zhike-team/log-koa-middleware/issues"
+  },
+  "homepage": "https://github.com/zhike-team/log-koa-middleware#readme"
+}

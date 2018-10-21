@@ -36,7 +36,11 @@ function logger (opts) {
     let mainSwitch = confirmLog(defaultOptions.pathConfig.logOnly, ctx.path)
 
     const startTime = new Date()
-    global.console.log = console.log.bind(global, `reqId: ${reqId} `)
+
+    // 柯里化，对console.log添加reqId
+    const descriptor = Object.getOwnPropertyDescriptor(console, 'log')
+    console.log = console.log.bind(global, `reqId: ${reqId} `)
+    Object.defineProperty(console, 'log', descriptor)
 
     // 打印headers
     let headersLogFlag = mainSwitch ? confirmLog(defaultOptions.pathConfig.requestHeaders, ctx.path) : false
@@ -57,18 +61,18 @@ function logger (opts) {
     if (mainSwitch && ctx.request.body) {
       let logFlag = confirmLog(defaultOptions.pathConfig.requestBody, ctx.path)
       if (logFlag) {
-        console.log('[requestBody]:', ctx.request.body.dataValues)
+        console.log('[requestBody]:', ctx.request.body.dataValues || ctx.request.body)
       }
     }
     // bling-bling
     await next()
 
-    // 打印responseBody配置
+		// 打印responseBody配置
     if (ctx.body) {
       if (mainSwitch) {
-        let logFlag = confirmLog(defaultOptions.pathConfig.responseBody, ctx.path)
+				let logFlag = confirmLog(defaultOptions.pathConfig.responseBody, ctx.path)
         if (logFlag) {
-          console.log('[responseBody]:', ctx.data.dataValues || ctx.data)
+          console.log('[responseBody]:', ctx.body.dataValues || ctx.body)
         }
       }
 
@@ -87,7 +91,7 @@ function logger (opts) {
 
   // 检测path是否符合详细config配置
   function confirmLog (config, path) {
-    if (config === null) {
+    if (config === null || JSON.stringify(config) === '[]') {
       return false
     }
 
