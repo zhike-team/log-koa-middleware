@@ -33,4 +33,7 @@ app.use(logger({
 | responseBodyWhiteList               | Array                           | 白名单                            |
 | responseBodyBlackList       | Array                           | 黑名单                       |
 
-注意： 默认打印reqId,路径，方法，响应时间，requestBody。responseBodyWhiteList和不能和responseBodyBlackList同时传值
+注意： 
+1. 默认打印reqId,路径，方法，响应时间，requestBody。
+2. 默认不打印responseBody。
+3. responseBodyWhiteList和不能和responseBodyBlackList同时传值
