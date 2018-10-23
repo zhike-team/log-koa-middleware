@@ -18,11 +18,9 @@ app.use(logger())
 
 // 只打印/player路径的headers和requestBody
 app.use(logger({
-    requestHeadersAttributes: ['content-type', 'host'],
-    pathConfig: {
-        logOnly: ['/player'],
-        responseBody:[]
-    }
+    requestHeaders: ['content-type'],
+    responseHeaders: ['content-type'],
+    responseBodyWhiteList: ['/player2']
 }))
 ```
 
