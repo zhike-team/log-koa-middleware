@@ -6,23 +6,15 @@ module.exports = logger
 function logger (opts) {
   let reqId
   let defaultOptions = {
-    requestHeadersAttributes: 'all',
-    pathConfig: {
-      logOnly: true,
-      requestBody: true,
-      responseBody: true,
-      requestHeaders: true
-    }
+    requestHeaders: [],
+    responseHeaders: [],
+    responseBodyWhiteList:[],
+    responseBodyBlackList:[]
   }
 
   // 初始化配置
   if (typeof opts === 'object') {
-    if (opts.pathConfig) {
-      defaultOptions.pathConfig = Object.assign(defaultOptions.pathConfig, opts.pathConfig)
-    }
-    if (opts.requestHeadersAttributes) {
-      defaultOptions.requestHeadersAttributes = opts.requestHeadersAttributes
-    }
+    defaultOptions = Object.assign(defaultOptions, opts)
   }
 
   // 初始化响应id
@@ -33,46 +25,63 @@ function logger (opts) {
   }
 
   return async function (ctx, next) {
-    let mainSwitch = confirmLog(defaultOptions.pathConfig.logOnly, ctx.path)
-
     const startTime = new Date()
 
     // 柯里化，对console.log添加reqId
-    const descriptor = Object.getOwnPropertyDescriptor(console, 'log')
-    console.log = console.log.bind(global, `reqId: ${reqId} `)
-    Object.defineProperty(console, 'log', descriptor)
+    const orginalLogger = console.log 
+    console.log = console.log.bind(console, `${reqId}: `)
 
-    // 打印headers
-    let headersLogFlag = mainSwitch ? confirmLog(defaultOptions.pathConfig.requestHeaders, ctx.path) : false
-    if (headersLogFlag) {
-      if (defaultOptions.requestHeadersAttributes === 'all') {
-        console.log('[requestHeaders]:', ctx.headers)
-      } else if (Array.isArray(defaultOptions.requestHeadersAttributes) && defaultOptions.requestHeadersAttributes.length) {
-        const headers = ctx.headers
-        const logHeaders = {}
-        defaultOptions.requestHeadersAttributes.forEach(key => {
-          logHeaders[key] = headers[key.toLowerCase()]
-        })
-        console.log('[requestHeaders]:', logHeaders)
-      }
+    orginalLogger(`----> ${reqId}`)
+    orginalLogger(ctx.method, ctx.originalUrl)
+
+    // 打印requestHeaders
+    const headers = ctx.headers
+    const requestHeaders = defaultOptions.requestHeaders
+    if (Array.isArray(requestHeaders) && requestHeaders.length > 0) {
+      requestHeaders.forEach(item => {
+        if (headers[item.toLowerCase()]) {
+          orginalLogger(`${item}: ${headers[item]}`)
+        }
+      })
     }
 
     // 打印requestBody的配置
-    if (mainSwitch && ctx.request.body) {
-      let logFlag = confirmLog(defaultOptions.pathConfig.requestBody, ctx.path)
-      if (logFlag) {
-        console.log('[requestBody]:', ctx.request.body.dataValues || ctx.request.body)
-      }
-    }
+    orginalLogger(ctx.request.body.dataValues || ctx.request.body)
+
     // bling-bling
     await next()
 
-		// 打印responseBody配置
+
+    // 打印完整url及响应时间
+    const endTime = new Date()
+
+    orginalLogger(`<---- ${reqId} ${ctx.status} ${endTime - startTime} ms`)
+    // 打印responseHeaders
+    const resHeaders = ctx.response.headers
+    const responseHeaders = defaultOptions.responseHeaders
+    if (Array.isArray(responseHeaders) && responseHeaders.length > 0) {
+      responseHeaders.forEach(item => {
+        if (resHeaders[item.toLowerCase()]) {
+          orginalLogger(`${item}: ${resHeaders[item]}`)
+        }
+      })
+    }
+
+    // 打印responseBody配置
     if (ctx.body) {
-      if (mainSwitch) {
-				let logFlag = confirmLog(defaultOptions.pathConfig.responseBody, ctx.path)
-        if (logFlag) {
-          console.log('[responseBody]:', ctx.body.dataValues || ctx.body)
+      const responseBodyWhiteList = defaultOptions.responseBodyWhiteList
+      const responseBodyBlackList = defaultOptions.responseBodyBlackList
+      if (Array.isArray(responseBodyWhiteList) && responseBodyWhiteList.length>0) {
+        for (let path of responseBodyWhiteList) {
+          if (path === ctx.path || (path instanceof RegExp && path.test(ctx.path))) {
+            orginalLogger(ctx.body.dataValues || ctx.body)
+          } 
+        }
+      } else if (Array.isArray(responseBodyBlackList) && responseBodyBlackList.length>0) {
+        for (let path of responseBodyBlackList) {
+          if (path !== ctx.path && (path instanceof RegExp && !path.test(ctx.path))) {
+            orginalLogger(ctx.body.dataValues || ctx.body)
+          } 
         }
       }
 
@@ -84,35 +93,6 @@ function logger (opts) {
       throw new Error('response没有响应值')
     }
 
-    // 打印完整url及响应时间
-    const endTime = new Date()
-    console.log(ctx.method, ctx.originalUrl, ctx.status, ` ${endTime - startTime} ms`)
   }
 
-  // 检测path是否符合详细config配置
-  function confirmLog (config, path) {
-    if (config === null || JSON.stringify(config) === '[]') {
-      return false
-    }
-
-    let logFlag = false
-
-    if (config === true) {
-      logFlag = true
-    } else if (typeof config === 'object') {
-      // 传入了自定义配置
-      if (Array.isArray(config.omit)) {
-        // 指定的path不打印
-        if (!new Set(config.omit).has(path)) {
-          logFlag = true
-        }
-      } else if (Array.isArray(config)) {
-        // 只对指定的path打印
-        if (new Set(config).has(path)) {
-          logFlag = true
-        }
-      }
-    }
-    return logFlag
-  }
 }

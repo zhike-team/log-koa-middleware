@@ -16,22 +16,23 @@ app.use(router.routes())
 const server = app.listen()
 
 async function passed(ctx, next) {
+	console.log('this is a test')
   ctx.status = 200
   ctx.body = {b: 'passed'}
 }
 
-const logMiddleware = logger({
-		requestHeadersAttributes: ['content-type'],
-		pathConfig: {
-			responseBody: []
-		}
-})
+const logMiddleware = logger()
+
 const logMiddleware1 = logger({
-    pathConfig: {
-        logOnly: {omit: ['/player1']}
-    }
+		requestHeaders: ['content-type'],
+		responseBodyWhiteList: [/player/]
 })
-const logMiddleware2 = logger()
+
+const logMiddleware2 = logger({
+		requestHeaders: ['content-type'],
+		responseHeaders: ['content-type'],
+		responseBodyWhiteList: ['/player2']
+})
 
 router.post('/player', logMiddleware, passed)
 router.post('/player1', logMiddleware1, passed)
@@ -47,7 +48,7 @@ describe('测试配置', function () {
 		log.restore()
 	})
 
-  it('headers只打印content-type,不打印requestBody', async function () {
+  it('player只打印request', async function () {
     await request(server)
 			.post('/player')
 			.set('content-type', 'application/json')
@@ -56,34 +57,31 @@ describe('测试配置', function () {
       .send({"name":"john"})
 			.expect(200)
 			.then((data)=>{
-				const requestHeaders = log.getCall(0).args[1] 
-				assert.ok(requestHeaders['content-type'] && !requestHeaders['host'])
-
-				assert.ok(log.getCall(2).args[0] !== '[responseBody]:')
+				assert.ok(log.getCall(1).args[0] === 'POST')
+				assert.ok(log.getCall(1).args[1] === '/player')
+				assert.ok(log.getCall(2).args[0]['name'] === 'john')
 			})
   })
-  it('play1不打印headers,requestBody,responseBody', async function () {
+  it('play1打印requestHeaders中的content-type', async function () {
     await request(server)
 			.post('/player1')
 			.set('content-type', 'application/json')
       .send({"name":"john"})
 			.expect(200)
 			.then((data)=>{
-				assert.ok(log.getCall(0).args[0] === 'POST')
+				const requestHeaders = log.getCall(2).args[0] 
+				assert.ok(requestHeaders === 'content-type: application/json')
 			})
   })
   it('/player2打印所有', async function () {
     await request(server)
       .post('/player2')
       .send({"name":"john"})
-      .set('content-type', 'applicaton/json')
+      .set('content-type', 'application/json')
 			.expect(200)
 			.then((data)=>{
-				assert.ok(log.getCall(0).args[0] === '[requestHeaders]:'
-					&& log.getCall(1).args[0] === '[requestBody]:'
-					&& log.getCall(2).args[0] === '[responseBody]:'
-					&& log.getCall(3).args[0] === 'POST'
-				)
+				assert.ok(log.getCall(6).args[0] === 'content-type: application/json; charset=utf-8')
+				assert.ok(log.getCall(7).args[0]['b'] === 'passed')
 			})
 	})
 })

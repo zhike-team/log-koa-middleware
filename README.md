@@ -30,12 +30,9 @@ app.use(logger({
 | 参数名                 | 类型                          |  说明  |
 | --------              | -----                         | ------ |
 | reqId                    | String                           | 响应标识id(如果为空则使用uuidv1自动生成reqId,并添加到ctx.body中)                            |
-| requestHeadersAttributes | Array                      | 需要打印的头部                  |
-| pathConfig               | Object                           | 路径相关配置                            |
-| pathConfig.logOnly        | Array/Object                           | 对于headers,requestBody,requestResponse,默认全打印。为数组则只有数组内的path才打印(空数组即都不打印)。为对象则需其omit属性为数组，只有数组内的path不打印                       |
-| pathConfig.requestBody   | Array/Object | 默认所有路径都打印requestBody。为数组则只有数组内的path打印(空数组即都不打印)。为对象则需其omit属性为数组，只有数组内的path不打印     |
-| pathConfig.responseBody  | Array/Object | 默认所有路径都打印requestBody。为数组则只有数组内的path打印(空数组即都不打印)。为对象则其omit属性为数组，只有数组内的path不打印     |
-| pathConfig.requestHeaders  | Array/Object | 默认所有路径都打印requestBody。为数组则只有数组内的path打印(空数组即都不打印)。为对象则其omit属性为数组，只有数组内的path不打印     |
+| requestHeaders | Array                      | 需要打印的request头部   (默认不打印)            |
+| responseHeaders | Array                      | 需要打印的response头部 (默认不打印)                 |
+| responseBodyWhiteList               | Array                           | 白名单                            |
+| responseBodyBlackList       | Array                           | 黑名单                       |
 
-注意： pathConfig.logOnly相当于第一道开关，pathConfig的其他属性是 在第一道开关(已放行，将打印headers,requestBody,responseBody的path)的基础上的限制
-即使是没有经过第一道开关的路由，也将会打印 reqId,路径，方法，响应时间
+注意： 默认打印reqId,路径，方法，响应时间，requestBody。responseBodyWhiteList和不能和responseBodyBlackList同时传值
