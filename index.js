@@ -73,16 +73,22 @@ function logger (opts) {
     if (ctx.body) {
       const responseBodyWhiteList = defaultOptions.responseBodyWhiteList
       const responseBodyBlackList = defaultOptions.responseBodyBlackList
+      
+      let logBody = ctx.body
+      if(/application\/json/.test(resHeaders['content-type'])) {
+        logBody = JSON.stringify(ctx.body, null, '  ')
+      }
+
       if (Array.isArray(responseBodyWhiteList) && responseBodyWhiteList.length>0) {
         for (let path of responseBodyWhiteList) {
           if (path === ctx.path || (path instanceof RegExp && path.test(ctx.path))) {
-            orginalLogger(ctx.body.dataValues || ctx.body)
+            orginalLogger(logBody)
           } 
         }
       } else if (Array.isArray(responseBodyBlackList) && responseBodyBlackList.length>0) {
         for (let path of responseBodyBlackList) {
           if (path !== ctx.path && (path instanceof RegExp && !path.test(ctx.path))) {
-            orginalLogger(ctx.body.dataValues || ctx.body)
+            orginalLogger(logBody)
           } 
         }
       }

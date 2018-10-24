@@ -1,6 +1,6 @@
 {
   "name": "@zhike/log-koa-middleware",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "日志打印中间件",
   "main": "index.js",
   "dependencies": {
