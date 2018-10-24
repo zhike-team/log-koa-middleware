@@ -75,7 +75,7 @@ function logger (opts) {
       const responseBodyBlackList = defaultOptions.responseBodyBlackList
       
       let logBody = ctx.body
-      if(/application\/json/.test(resHeaders['content-type'])) {
+      if(/application\/json/.test(ctx.response.get('content-type'))) {
         logBody = JSON.stringify(ctx.body, null, '  ')
       }
 
