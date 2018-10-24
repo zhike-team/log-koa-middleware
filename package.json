@@ -1,5 +1,5 @@
 {
-  "name": "log-koa-middleware",
+  "name": "@zhike/log-koa-middleware",
   "version": "1.0.0",
   "description": "日志打印中间件",
   "main": "index.js",

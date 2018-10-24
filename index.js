@@ -46,7 +46,9 @@ function logger (opts) {
     }
 
     // 打印requestBody的配置
-    orginalLogger(ctx.request.body.dataValues || ctx.request.body)
+    if (ctx.request.body) {
+      orginalLogger(ctx.request.body)
+    }
 
     // bling-bling
     await next()
