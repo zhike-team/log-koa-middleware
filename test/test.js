@@ -41,7 +41,7 @@ router.post('/player2', logMiddleware2, passed)
 let log
 describe('测试配置', function () {
 	beforeEach(function () {
-		log = sinon.spy(console, 'log')
+		log = sinon.spy(logger, 'originalLogger')
 	})
 
 	afterEach(function () {
@@ -81,7 +81,7 @@ describe('测试配置', function () {
 			.expect(200)
 			.then((data)=>{
 				assert.ok(log.getCall(6).args[0] === 'content-type: application/json; charset=utf-8')
-				assert.ok(log.getCall(7).args[0]['b'] === 'passed')
+				assert.ok(log.getCall(7).args[0] === JSON.stringify({b:'passed'}, null, '  '))
 			})
 	})
 })

@@ -3,6 +3,8 @@ const uuidv1 = require('uuid/v1')
 
 module.exports = logger
 
+logger.originalLogger = console.log 
+
 function logger (opts) {
   let reqId
   let defaultOptions = {
@@ -11,9 +13,6 @@ function logger (opts) {
     responseBodyWhiteList:[],
     responseBodyBlackList:[]
   }
-
-  // 柯里化，对console.log添加reqId
-  const originalLogger = console.log 
 
   // 初始化配置
   if (typeof opts === 'object') {
@@ -31,10 +30,10 @@ function logger (opts) {
 
     const startTime = new Date()
 
-    console.log = originalLogger.bind(console, `${reqId}: `)
+    console.log = logger.originalLogger.bind(console, `${reqId}: `)
 
-    originalLogger(`----> ${reqId}`)
-    originalLogger(ctx.method, ctx.originalUrl)
+    logger.originalLogger(`----> ${reqId}`)
+    logger.originalLogger(ctx.method, ctx.originalUrl)
 
     // 打印requestHeaders
     const headers = ctx.headers
@@ -42,14 +41,14 @@ function logger (opts) {
     if (Array.isArray(requestHeaders) && requestHeaders.length > 0) {
       requestHeaders.forEach(item => {
         if (headers[item.toLowerCase()]) {
-          originalLogger(`${item}: ${headers[item]}`)
+          logger.originalLogger(`${item}: ${headers[item]}`)
         }
       })
     }
 
     // 打印requestBody的配置
     if (ctx.request.body) {
-      originalLogger(ctx.request.body)
+      logger.originalLogger(ctx.request.body)
     }
 
     // bling-bling
@@ -59,14 +58,14 @@ function logger (opts) {
     // 打印完整url及响应时间
     const endTime = new Date()
 
-    originalLogger(`<---- ${reqId} ${ctx.status} ${endTime - startTime} ms`)
+    logger.originalLogger(`<---- ${reqId} ${ctx.status} ${endTime - startTime} ms`)
     // 打印responseHeaders
     const resHeaders = ctx.response.headers
     const responseHeaders = defaultOptions.responseHeaders
     if (Array.isArray(responseHeaders) && responseHeaders.length > 0) {
       responseHeaders.forEach(item => {
         if (resHeaders[item.toLowerCase()]) {
-          originalLogger(`${item}: ${resHeaders[item]}`)
+          logger.originalLogger(`${item}: ${resHeaders[item]}`)
         }
       })
     }
@@ -84,13 +83,13 @@ function logger (opts) {
       if (Array.isArray(responseBodyWhiteList) && responseBodyWhiteList.length>0) {
         for (let path of responseBodyWhiteList) {
           if (path === ctx.path || (path instanceof RegExp && path.test(ctx.path))) {
-            originalLogger(logBody)
+            logger.originalLogger(logBody)
           } 
         }
       } else if (Array.isArray(responseBodyBlackList) && responseBodyBlackList.length>0) {
         for (let path of responseBodyBlackList) {
           if (path !== ctx.path && (path instanceof RegExp && !path.test(ctx.path))) {
-            originalLogger(logBody)
+            logger.originalLogger(logBody)
           } 
         }
       }
