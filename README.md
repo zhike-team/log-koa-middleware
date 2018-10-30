@@ -1,6 +1,7 @@
 # log-koa-middleware
 日志打印中间件
 
+[![asciicast](https://asciinema.org/a/AWfYPWpRrdxtkK1i39vtC063k.png)](https://asciinema.org/a/AWfYPWpRrdxtkK1i39vtC063k)
 # Install
 ```
 $ npm install @zhike/log-koa-middleware
@@ -13,10 +14,10 @@ const Koa = require('koa')
 
 const app = new Koa()
 
-//将打印所有路径的headers,requestBody,rresponseBody
+//只打印requestBody
 app.use(logger())
 
-// 只打印/player路径的headers和requestBody
+// 打印所有路径的headers中的content-type。只打印/player路径的responseBody
 app.use(logger({
     requestHeaders: ['content-type'],
     responseHeaders: ['content-type'],
@@ -34,6 +35,8 @@ app.use(logger({
 | responseBodyBlackList       | Array                           | 黑名单                       |
 
 注意： 
-1. 默认打印reqId,路径，方法，响应时间，requestBody。
-2. 默认不打印responseBody。
-3. responseBodyWhiteList和不能和responseBodyBlackList同时传值
+1. 必会打印reqId,路径，方法，响应时间。
+2. 默认打印requestBody。
+3. 默认不打印responseBody。
+4. responseBodyWhiteList和不能和responseBodyBlackList同时传值
+5. responseBodyWhiteList和responseBodyBlackList暂未支持同一path不同method,后续会完善。
