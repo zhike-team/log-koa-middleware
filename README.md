@@ -1,7 +1,8 @@
 # log-koa-middleware
 日志打印中间件
 
-[![asciicast](https://asciinema.org/a/AWfYPWpRrdxtkK1i39vtC063k.png)](https://asciinema.org/a/AWfYPWpRrdxtkK1i39vtC063k)
+![image](readme.svg)
+
 # Install
 ```
 $ npm install @zhike/log-koa-middleware
