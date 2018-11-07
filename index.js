@@ -1,5 +1,5 @@
 
-const uuidv1 = require('uuid/v1')
+const uuidv4 = require('uuid/v4')
 
 module.exports = logger
 
@@ -25,7 +25,7 @@ function logger (opts) {
     if (typeof opts === 'object' && opts.reqId) {
       reqId = ctx[opts.reqId]
     } else {
-      reqId = uuidv1()
+      reqId = uuidv4()
     }
 
     const startTime = new Date()
