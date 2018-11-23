@@ -98,11 +98,6 @@ function logger (opts) {
           }
         }
       }
-
-      // 没有自定义reqId则手动补充
-      if (!opts || !opts.reqId) {
-        ctx.body = Object.assign({reqId}, ctx.body)
-      }
     } else {
       throw new Error('response没有响应值')
     }

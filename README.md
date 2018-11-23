@@ -29,7 +29,7 @@ app.use(logger({
 ## Configuration Options
 | 参数名                 | 类型                          |  说明  |
 | --------              | -----                         | ------ |
-| reqId                    | String                           | 响应标识id(使用自定义的reqId需放在日志中间件前。如果为空且ctx.reqId为空则使用uuidv4自动生成reqId,并添加到ctx.body中)                            |
+| reqId                    | String                           | 响应标识id(使用自定义的reqId需放在日志中间件前。如果为空且ctx.reqId为空则使用uuidv4自动生成reqId)                            |
 | requestHeaders | Array                      | 需要打印的request头部   (默认不打印)            |
 | responseHeaders | Array                      | 需要打印的response头部 (默认不打印)                 |
 | responseBodyWhiteList               | Array                           | 白名单(对于正则匹配剔除部分路由,可在业务代码中的ctx.useResponseBodyOption=false跳过路由规则)                            |
