@@ -18,22 +18,22 @@ const app = new Koa()
 //只打印requestBody
 app.use(logger())
 
-// 打印所有路径的headers中的content-type。只打印/player路径的responseBody
+// 打印所有路径的headers中的content-type。只打印以/player2开头的路径的responseBody
 app.use(logger({
     requestHeaders: ['content-type'],
     responseHeaders: ['content-type'],
-    responseBodyWhiteList: ['/player2']
+    responseBodyWhiteList: ['/^\/player2/']
 }))
 ```
 
 ## Configuration Options
 | 参数名                 | 类型                          |  说明  |
 | --------              | -----                         | ------ |
-| reqId                    | String                           | 响应标识id(如果为空则使用uuidv1自动生成reqId,并添加到ctx.body中)                            |
+| reqId                    | String                           | 响应标识id(使用自定义的reqId需放在日志中间件前。如果为空且ctx.reqId为空则使用uuidv4自动生成reqId,并添加到ctx.body中)                            |
 | requestHeaders | Array                      | 需要打印的request头部   (默认不打印)            |
 | responseHeaders | Array                      | 需要打印的response头部 (默认不打印)                 |
-| responseBodyWhiteList               | Array                           | 白名单                            |
-| responseBodyBlackList       | Array                           | 黑名单                       |
+| responseBodyWhiteList               | Array                           | 白名单(对于正则匹配剔除部分路由,可在业务代码中的ctx.useResponseBodyOption=false跳过路由规则)                            |
+| responseBodyBlackList       | Array                           | 黑名单(对于正则匹配剔除部分路由,可在业务代码中使用ctx.useResponseBodyOption=false跳过路由规则)                      |
 
 注意： 
 1. 必会打印reqId,路径，方法，响应时间。

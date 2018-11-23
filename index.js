@@ -24,6 +24,8 @@ function logger (opts) {
     // 初始化响应id
     if (typeof opts === 'object' && opts.reqId) {
       reqId = ctx[opts.reqId]
+    } else if (ctx.reqId) {
+      reqId = ctx.reqId
     } else {
       reqId = uuidv4()
     }
@@ -80,17 +82,20 @@ function logger (opts) {
         logBody = JSON.stringify(ctx.body, null, '  ')
       }
 
-      if (Array.isArray(responseBodyWhiteList) && responseBodyWhiteList.length>0) {
-        for (let path of responseBodyWhiteList) {
-          if (path === ctx.path || (path instanceof RegExp && path.test(ctx.path))) {
-            logger.originalLogger(logBody)
-          } 
-        }
-      } else if (Array.isArray(responseBodyBlackList) && responseBodyBlackList.length>0) {
-        for (let path of responseBodyBlackList) {
-          if (path !== ctx.path && (path instanceof RegExp && !path.test(ctx.path))) {
-            logger.originalLogger(logBody)
-          } 
+      // 用户可以在业务代码中添加该标志来应对 正则匹配后的剔除情况
+      if (ctx.useResponseBodyOption !== false) {
+        if (Array.isArray(responseBodyWhiteList) && responseBodyWhiteList.length>0) {
+          for (let path of responseBodyWhiteList) {
+            if (path === ctx.path || (path instanceof RegExp && path.test(ctx.path))) {
+              logger.originalLogger(logBody)
+            } 
+          }
+        } else if (Array.isArray(responseBodyBlackList) && responseBodyBlackList.length>0) {
+          for (let path of responseBodyBlackList) {
+            if (path !== ctx.path && (path instanceof RegExp && !path.test(ctx.path))) {
+              logger.originalLogger(logBody)
+            } 
+          }
         }
       }
 
