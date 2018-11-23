@@ -54,20 +54,16 @@ function logger (opts) {
     }
 
     // request 结束符
-    logger.originalLogger(`<-------- req[${reqId}]`)
+    logger.originalLogger(`-------- req[${reqId}]`)
 
     // bling-bling
     await next()
 
-
-    // 打印完整url及响应时间
-    const endTime = new Date()
-
-    logger.originalLogger(`========> res[${reqId}] ${ctx.status} ${endTime - startTime} ms`)
     // 打印responseHeaders
     const resHeaders = ctx.response.headers
     const responseHeaders = defaultOptions.responseHeaders
     if (Array.isArray(responseHeaders) && responseHeaders.length > 0) {
+      logger.originalLogger(`======== resp headers[${reqId}]`)
       responseHeaders.forEach(item => {
         if (resHeaders[item.toLowerCase()]) {
           logger.originalLogger(`${item}: ${resHeaders[item]}`)
@@ -90,12 +86,14 @@ function logger (opts) {
         if (Array.isArray(responseBodyWhiteList) && responseBodyWhiteList.length>0) {
           for (let path of responseBodyWhiteList) {
             if (path === ctx.path || (path instanceof RegExp && path.test(ctx.path))) {
+              logger.originalLogger(`======== resp body[${reqId}]`)
               logger.originalLogger(logBody)
             } 
           }
         } else if (Array.isArray(responseBodyBlackList) && responseBodyBlackList.length>0) {
           for (let path of responseBodyBlackList) {
             if (path !== ctx.path && (path instanceof RegExp && !path.test(ctx.path))) {
+              logger.originalLogger(`======== resp body[${reqId}]`)
               logger.originalLogger(logBody)
             } 
           }
@@ -106,7 +104,9 @@ function logger (opts) {
     }
 
     // response 结束符
-    logger.originalLogger(`<======== res[${reqId}] ${ctx.status} ${endTime - startTime} ms`)
+    // 打印完整url及响应时间
+    const endTime = new Date()
+    logger.originalLogger(`<======== resp[${reqId}] ${ctx.status} ${endTime - startTime} ms`)
   }
 
 }

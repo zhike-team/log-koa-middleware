@@ -117,7 +117,7 @@ describe('测试配置', function () {
 			.expect(200)
 			.then((data)=>{
 				assert.ok(log.getCall(7).args[0] === 'content-type: application/json; charset=utf-8')
-				assert.ok(log.getCall(8).args[0] === JSON.stringify({b:'passed'}, null, '  '))
+				assert.ok(log.getCall(9).args[0] === JSON.stringify({b:'passed'}, null, '  '))
 			})
 	})
   it('/player3 reqId使用业务自定义字段', async function () {
