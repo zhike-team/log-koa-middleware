@@ -34,7 +34,7 @@ function logger (opts) {
 
     console.log = logger.originalLogger.bind(console, `${reqId}: `)
 
-    logger.originalLogger(`----> ${reqId}`)
+    logger.originalLogger(`--------> req[${reqId}]`)
     logger.originalLogger(ctx.method, ctx.originalUrl)
 
     // 打印requestHeaders
@@ -49,9 +49,12 @@ function logger (opts) {
     }
 
     // 打印requestBody的配置
-    if (ctx.request.body) {
-      logger.originalLogger(ctx.request.body)
+    if (ctx.request.rawBody) {
+      logger.originalLogger(ctx.request.rawBody)
     }
+
+    // request 结束符
+    logger.originalLogger(`<-------- req[${reqId}]`)
 
     // bling-bling
     await next()
@@ -60,7 +63,7 @@ function logger (opts) {
     // 打印完整url及响应时间
     const endTime = new Date()
 
-    logger.originalLogger(`<---- ${reqId} ${ctx.status} ${endTime - startTime} ms`)
+    logger.originalLogger(`========> res[${reqId}] ${ctx.status} ${endTime - startTime} ms`)
     // 打印responseHeaders
     const resHeaders = ctx.response.headers
     const responseHeaders = defaultOptions.responseHeaders
@@ -102,6 +105,8 @@ function logger (opts) {
       throw new Error('response没有响应值')
     }
 
+    // response 结束符
+    logger.originalLogger(`<======== res[${reqId}] ${ctx.status} ${endTime - startTime} ms`)
   }
 
 }

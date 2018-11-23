@@ -55,6 +55,7 @@ const logMiddleware3 = logger({
 		responseBodyWhiteList: ['/player3']
 })
 
+router.get('/player', logMiddleware, passed)
 router.post('/player', logMiddleware, passed)
 router.post('/player1', logMiddleware1, passed)
 router.post('/player2', logMiddleware2, passed)
@@ -70,6 +71,18 @@ describe('测试配置', function () {
 		log.restore()
 	})
 
+  it('GET请求player只打印request', async function () {
+    await request(server)
+			.get('/player')
+			.set('content-type', 'application/json')
+			.set('host', 'localhost')
+			.set('Accept', 'application/json')
+			.expect(200)
+			.then((data)=>{
+				assert.ok(log.getCall(1).args[0] === 'GET')
+				assert.ok(log.getCall(1).args[1] === '/player')
+			})
+  })
   it('player只打印request', async function () {
     await request(server)
 			.post('/player')
@@ -81,7 +94,8 @@ describe('测试配置', function () {
 			.then((data)=>{
 				assert.ok(log.getCall(1).args[0] === 'POST')
 				assert.ok(log.getCall(1).args[1] === '/player')
-				assert.ok(log.getCall(2).args[0]['name'] === 'john')
+				const requestBody = JSON.parse(log.getCall(2).args[0]) 
+				assert.ok(requestBody['name'] === 'john')
 			})
   })
   it('play1打印requestHeaders中的content-type', async function () {
@@ -102,8 +116,8 @@ describe('测试配置', function () {
       .set('content-type', 'application/json')
 			.expect(200)
 			.then((data)=>{
-				assert.ok(log.getCall(6).args[0] === 'content-type: application/json; charset=utf-8')
-				assert.ok(log.getCall(7).args[0] === JSON.stringify({b:'passed'}, null, '  '))
+				assert.ok(log.getCall(7).args[0] === 'content-type: application/json; charset=utf-8')
+				assert.ok(log.getCall(8).args[0] === JSON.stringify({b:'passed'}, null, '  '))
 			})
 	})
   it('/player3 reqId使用业务自定义字段', async function () {
