@@ -20,6 +20,11 @@ function logger (opts) {
   }
 
   return async function (ctx, next) {
+    // options请求不打印日志
+    if (ctx.method === 'OPTIONS') {
+      await next()
+      return
+    }
 
     // 初始化响应id
     if (typeof opts === 'object' && opts.reqId) {
