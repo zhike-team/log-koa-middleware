@@ -104,8 +104,6 @@ function logger (opts) {
           }
         }
       }
-    } else {
-      throw new Error('response没有响应值')
     }
 
     // response 结束符
