@@ -1,7 +1,7 @@
 # log-koa-middleware
 日志打印中间件
 
-![image](example.png)
+![image](example.jpg)
 
 # Install
 ```

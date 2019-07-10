@@ -40,7 +40,7 @@ function logger (opts) {
     console.log = logger.originalLogger.bind(console, `${reqId}: `)
 
     logger.originalLogger(`--------> req[${reqId}]`)
-    logger.originalLogger(ctx.method, ctx.originalUrl)
+    console.log(ctx.method, ctx.originalUrl)
 
     // 打印requestHeaders
     const headers = ctx.headers
@@ -48,14 +48,14 @@ function logger (opts) {
     if (Array.isArray(requestHeaders) && requestHeaders.length > 0) {
       requestHeaders.forEach(item => {
         if (headers[item.toLowerCase()]) {
-          logger.originalLogger(`${item}: ${headers[item]}`)
+          console.log(`${item}: ${headers[item]}`)
         }
       })
     }
 
     // 打印requestBody的配置
     if (ctx.request.rawBody) {
-      logger.originalLogger(ctx.request.rawBody)
+      console.log(ctx.request.rawBody)
     }
 
     // request 结束符
@@ -71,7 +71,7 @@ function logger (opts) {
       logger.originalLogger(`======== resp headers[${reqId}]`)
       responseHeaders.forEach(item => {
         if (resHeaders[item.toLowerCase()]) {
-          logger.originalLogger(`${item}: ${resHeaders[item]}`)
+          console.log(`${item}: ${resHeaders[item]}`)
         }
       })
     }
@@ -92,14 +92,14 @@ function logger (opts) {
           for (let path of responseBodyWhiteList) {
             if (path === ctx.path || (path instanceof RegExp && path.test(ctx.path))) {
               logger.originalLogger(`======== resp body[${reqId}]`)
-              logger.originalLogger(logBody)
+              console.log(logBody)
             } 
           }
         } else if (Array.isArray(responseBodyBlackList) && responseBodyBlackList.length>0) {
           for (let path of responseBodyBlackList) {
             if (path !== ctx.path && (path instanceof RegExp && !path.test(ctx.path))) {
               logger.originalLogger(`======== resp body[${reqId}]`)
-              logger.originalLogger(logBody)
+              console.log(logBody)
             } 
           }
         }

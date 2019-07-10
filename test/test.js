@@ -79,8 +79,8 @@ describe('测试配置', function () {
 			.set('Accept', 'application/json')
 			.expect(200)
 			.then((data)=>{
-				assert.ok(log.getCall(1).args[0] === 'GET')
-				assert.ok(log.getCall(1).args[1] === '/player')
+				assert.ok(log.getCall(1).args[1] === 'GET')
+				assert.ok(log.getCall(1).args[2] === '/player')
 			})
   })
   it('player只打印request', async function () {
@@ -92,9 +92,9 @@ describe('测试配置', function () {
       .send({"name":"john"})
 			.expect(200)
 			.then((data)=>{
-				assert.ok(log.getCall(1).args[0] === 'POST')
-				assert.ok(log.getCall(1).args[1] === '/player')
-				const requestBody = JSON.parse(log.getCall(2).args[0]) 
+				assert.ok(log.getCall(1).args[1] === 'POST')
+				assert.ok(log.getCall(1).args[2] === '/player')
+				const requestBody = JSON.parse(log.getCall(2).args[1]) 
 				assert.ok(requestBody['name'] === 'john')
 			})
   })
@@ -105,7 +105,7 @@ describe('测试配置', function () {
       .send({"name":"john"})
 			.expect(200)
 			.then((data)=>{
-				const requestHeaders = log.getCall(2).args[0] 
+				const requestHeaders = log.getCall(2).args[1] 
 				assert.ok(requestHeaders === 'content-type: application/json')
 			})
   })
@@ -116,8 +116,8 @@ describe('测试配置', function () {
       .set('content-type', 'application/json')
 			.expect(200)
 			.then((data)=>{
-				assert.ok(log.getCall(7).args[0] === 'content-type: application/json; charset=utf-8')
-				assert.ok(log.getCall(9).args[0] === JSON.stringify({b:'passed'}, null, '  '))
+				assert.ok(log.getCall(7).args[1] === 'content-type: application/json; charset=utf-8')
+				assert.ok(log.getCall(9).args[1] === JSON.stringify({b:'passed'}, null, '  '))
 			})
 	})
   it('/player3 reqId使用业务自定义字段', async function () {
